@@ -1,16 +1,8 @@
 <script setup>
 import { reactive } from 'vue'
+import toRoman from './utils/toRoman.js'
+import { isNumeric } from './utils/validation.js'
 var arabic = null;
-
-const numeralMapping = {
-  1: 'I',
-  5: 'V',
-  10: 'X',
-  50: 'L',
-  100: 'C',
-  500: 'D',
-  1000: 'M'
-}
 
 const numeralMappingReverse = {
   'I': 1,
@@ -22,60 +14,85 @@ const numeralMappingReverse = {
   'M': 1000
 }
 
+const error = reactive({
+  romanError: "",
+  romanErrorClass: "d-none",
+  arabicError:"",
+  arabicErrorClass : "d-none"
+})
 
-const roman = reactive({
-  value: null
-});
+const boundNumeralDisplay = reactive({
+  roman: null,
+  arabic: null
+})
 
-function toRoman(event){
-  const numeral = Number(event.target.value);
-  let remainder = numeral;
-  let romanNumeral = ""
-  const orderOfMagnitude = Math.floor(Math.log10(numeral));
-  for (let i=orderOfMagnitude; i>=0; i--){
-    const quoient = Math.floor(remainder / 10**i);
-    remainder = remainder % (10**i);
-    console.log(i, remainder, quoient);
-
-    if (quoient <= 3){
-      const romanNumeralPart = numeralMapping[10**i].repeat(quoient);
-      romanNumeral += romanNumeralPart;
-    } else if (quoient <= 5) {
-      const romanNumeralPart = `${numeralMapping[10**i].repeat(5-quoient)}${numeralMapping[5*(10**i)]}`
-      romanNumeral += romanNumeralPart;
-    } else if (quoient <= 8) {
-      const romanNumeralPart = `${numeralMapping[5*(10**i)]}${numeralMapping[10**i].repeat(quoient-5)}`
-      romanNumeral += romanNumeralPart;
-    } else {
-      const romanNumeralPart = `${numeralMapping[10**i].repeat(10-quoient)}${numeralMapping[10**(i+1)]}`
-      romanNumeral += romanNumeralPart;
-    }
+function isValidArabicInput(input){
+  if (!isNumeric(input) && input !== ""){
+    error.arabicError = "Input contains non-numeric characters";
+    error.arabicErrorClass = "text-danger";
+    return false;
   }
-  roman.value = romanNumeral;
+
+  if (Number(input) > 4000000){
+    error.arabicError = "Numbers greater than 3999999 can't be expressed in roman numerals";
+    error.arabicErrorClass = "text-danger";
+    return false;
+  }
+
+  if (Number(input) < 0){
+    error.arabicError = "Negative numbers can't be expressed in roman numerals";
+    error.arabicErrorClass = "text-danger";
+    return false;
+  }
+
+  error.arabicError = "";
+  error.arabicErrorClass = "d-none";
+  return true;
+}
+
+function handleInputArabic(event){
+  const input = event.target.value;
+  if (isValidArabicInput(input)){
+    const numeral = (input === "") ? null : Number(input);
+    if (numeral === 0){
+      console.log(input)
+      boundNumeralDisplay.roman = "NULLA";
+      error.arabicError = "There is no roman numeral for 0. \"NULLA\" is the latin word for zero.";
+      error.arabicErrorClass = "text-warning";
+    } else {
+      boundNumeralDisplay.roman = toRoman(numeral);
+    }
+  } else {
+    boundNumeralDisplay.roman = "";
+  }
 }
 
 function toArabic(event){
-  console.log(event.target.value);
-  for (const e of event.target.value){
-    console.log(e);
-  }
 }
 </script>
 
 <template>
   <div>
     <input placeholder="Enter Arabic Numerals"
-    @input="toRoman">
+    @input="handleInputArabic">
+    <div :class="error.arabicErrorClass">{{error.arabicError}}</div>
     <input placeholder="Enter Roman Numerals" 
-    :value="roman.value"
-    @input="toArabic">
+    :value="boundNumeralDisplay.roman">
   </div>
 </template>
 
 <style scoped>
+input{
+  font-family: 'Noto Sans', sans-serif;
+  height: 200px;
+  font-size: 100px;
+  background-color: var(--color-background);
+  border: none;
+  border-bottom: 2px white solid;
+  color: white;
+}
 
+input:focus{
+  background-color: rgb(50, 52, 61);
+}
 </style>
-
-190
-remainder: 1, quoient: 1 = C
-remainder: 0, quoient: 9 = C
