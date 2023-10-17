@@ -57,9 +57,10 @@ function handleInputArabic(event){
     if (numeral === 0){
       console.log(input)
       boundNumeralDisplay.roman = "NULLA";
-      error.arabicError = "There is no roman numeral for 0. \"NULLA\" is the latin word for zero.";
+      error.arabicError = "There is no roman numeral for 0. \"Nulla\" is the latin word for zero.";
       error.arabicErrorClass = "text-warning";
     } else {
+      console.log(toRoman(numeral));
       boundNumeralDisplay.roman = toRoman(numeral);
     }
   } else {
@@ -84,8 +85,8 @@ function toArabic(event){
 <style scoped>
 input{
   font-family: 'Noto Sans', sans-serif;
-  height: 200px;
-  font-size: 100px;
+  height: 100px;
+  font-size: 60px;
   background-color: var(--color-background);
   border: none;
   border-bottom: 2px white solid;
