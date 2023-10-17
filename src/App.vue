@@ -1,18 +1,8 @@
 <script setup>
 import { reactive } from 'vue'
-import toRoman from './utils/toRoman.js'
-import { isNumeric } from './utils/validation.js'
-var arabic = null;
+import toRoman from './utils/roman.js'
+import { validateArabicInput } from './utils/arabic.js'
 
-const numeralMappingReverse = {
-  'I': 1,
-  'V': 5,
-  'X': 10,
-  'L': 50,
-  'C': 100,
-  'D': 500,
-  'M': 1000
-}
 
 const error = reactive({
   romanError: "",
@@ -26,36 +16,12 @@ const boundNumeralDisplay = reactive({
   arabic: null
 })
 
-function isValidArabicInput(input){
-  if (!isNumeric(input) && input !== ""){
-    error.arabicError = "Input contains non-numeric characters";
-    error.arabicErrorClass = "text-danger";
-    return false;
-  }
-
-  if (Number(input) > 4000000){
-    error.arabicError = "Numbers greater than 3999999 can't be expressed in roman numerals";
-    error.arabicErrorClass = "text-danger";
-    return false;
-  }
-
-  if (Number(input) < 0){
-    error.arabicError = "Negative numbers can't be expressed in roman numerals";
-    error.arabicErrorClass = "text-danger";
-    return false;
-  }
-
-  error.arabicError = "";
-  error.arabicErrorClass = "d-none";
-  return true;
-}
-
 function handleInputArabic(event){
   const input = event.target.value;
-  if (isValidArabicInput(input)){
+  const validatedInput = validateArabicInput(input);
+  if (validatedInput.isValid){
     const numeral = (input === "") ? null : Number(input);
     if (numeral === 0){
-      console.log(input)
       boundNumeralDisplay.roman = "NULLA";
       error.arabicError = "There is no roman numeral for 0. \"Nulla\" is the latin word for zero.";
       error.arabicErrorClass = "text-warning";
@@ -65,10 +31,17 @@ function handleInputArabic(event){
     }
   } else {
     boundNumeralDisplay.roman = "";
+    error.arabicError = validatedInput.error;
+    error.arabicErrorClass = "text-warning";
   }
 }
 
-function toArabic(event){
+function isValidRomanInput(input){
+  
+}
+
+function handleInputRoman(event){
+  
 }
 </script>
 
@@ -77,7 +50,9 @@ function toArabic(event){
     <input placeholder="Enter Arabic Numerals"
     @input="handleInputArabic">
     <div :class="error.arabicErrorClass">{{error.arabicError}}</div>
-    <input placeholder="Enter Roman Numerals" 
+
+    <input placeholder="Enter Roman Numerals"
+    @input="handleInputRoman"
     :value="boundNumeralDisplay.roman">
   </div>
 </template>

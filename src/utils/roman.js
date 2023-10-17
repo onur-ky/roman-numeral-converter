@@ -41,3 +41,7 @@ export default function toRoman(numeral){
   console.log(romanNumeral);
   return romanNumeral;
 }
+
+function validateRomanInput(input){
+  
+}
